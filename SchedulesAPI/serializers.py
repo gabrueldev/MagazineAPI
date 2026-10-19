@@ -17,12 +17,8 @@ class SchedulesSerializers(serializers.ModelSerializer):
         if end <= start:
             raise serializers.ValidationError("End time must be after start time.")
 
-        # Dois horários se chocam quando um começa antes do outro terminar
-        conflicts = Schedules.objects.filter(
-            room           = room,
-            start_time__lt = end,
-            end_time__gt   = start
-        )
+        starts_before_the_other_ends = dict(start_time__lt=end, end_time__gt=start)
+        conflicts = Schedules.objects.filter(room=room, **starts_before_the_other_ends)
 
         if self.instance:
             conflicts = conflicts.exclude(pk=self.instance.pk)

@@ -22,17 +22,24 @@ class DbListAPI(APIView):
         serializer = serializer_class(queryset, many=True)
         return Response(serializer.data)
 
+def find_room_by_name(room_name):
+    room = Room.objects.filter(name=room_name).first()
+    if not room:
+        return Response({"detail": "Object not found."}, status=status.HTTP_404_NOT_FOUND)
+    return Response(RoomSerializer(room).data)
+
+def list_schedules_of_room(room_name):
+    schedules = Schedules.objects.filter(room__name=room_name)
+    return Response(SchedulesSerializers(schedules, many=True).data)
+
+FILTER_BY_TABLE = {
+    'rooms': find_room_by_name,
+    'schedules': list_schedules_of_room,
+}
+
 class FilterAPI(APIView):
-    # rooms: busca a sala pelo nome | schedules: lista os agendamentos da sala com esse nome
     def get(self, request, dbname, objname):
-        if dbname == 'rooms':
-            room = Room.objects.filter(name=objname).first()
-            if not room:
-                return Response({"detail": "Object not found."}, status=status.HTTP_404_NOT_FOUND)
-            return Response(RoomSerializer(room).data)
-
-        if dbname == 'schedules':
-            schedules = Schedules.objects.filter(room__name=objname)
-            return Response(SchedulesSerializers(schedules, many=True).data)
-
-        return Response({"detail": "Table not found."}, status=status.HTTP_404_NOT_FOUND)
+        filter_function = FILTER_BY_TABLE.get(dbname)
+        if not filter_function:
+            return Response({"detail": "Table not found."}, status=status.HTTP_404_NOT_FOUND)
+        return filter_function(objname)

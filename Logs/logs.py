@@ -1,6 +1,4 @@
 LOGS_MESSAGES = {
-
-##  SUCCESS
     "success_room_create": "The room {none_room} was create.",
     "success_room_delete": "The room {none_id} was deleted.",
     "success_room_edited": "The room {none_id} was edited.",
@@ -10,6 +8,5 @@ LOGS_MESSAGES = {
     "success_schedule_create": "An appointment was created in {none_id}.",
     "success_schedule_edited": "The appointment {none_id} was edited.",
     "success_schedule_delete": "An appointment with id {none_id} was deleted.",
-##  FAILED
     "failed_room_edit": "The room {none_id} was not edited.",
 }
