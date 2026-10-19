@@ -19,10 +19,11 @@ def test_login_e_logout(client):
     token = response.data["token"]
 
     client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
-    assert client.post("/api/auth/logout/").status_code == 200
+    logout = client.post("/api/auth/logout/")
+    tentativa_com_token_antigo = client.post("/api/auth/logout/")
 
-    # Depois do logout o token antigo não vale mais
-    assert client.post("/api/auth/logout/").status_code == 401
+    assert logout.status_code == 200
+    assert tentativa_com_token_antigo.status_code == 401
 
 @pytest.mark.django_db
 def test_login_senha_errada(client):

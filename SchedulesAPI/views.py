@@ -14,19 +14,18 @@ from Logs.models import logger
 class ListScheduleView(ListAPIView):
     serializer_class = SchedulesSerializers
 
-    # Filtros opcionais: ?room=<id>&date=AAAA-MM-DD&mine=true
     def get_queryset(self):
         queryset = Schedules.objects.select_related('room', 'created_by')
-        params = self.request.query_params
+        optional_filters = self.request.query_params
 
-        if params.get('room'):
-            queryset = queryset.filter(room_id=params['room'])
-        if params.get('date'):
-            date = parse_date(params['date'])
+        if optional_filters.get('room'):
+            queryset = queryset.filter(room_id=optional_filters['room'])
+        if optional_filters.get('date'):
+            date = parse_date(optional_filters['date'])
             if not date:
                 raise ValidationError({"date": "Use the format YYYY-MM-DD."})
             queryset = queryset.filter(start_time__date=date)
-        if params.get('mine') == 'true' and self.request.user.is_authenticated:
+        if optional_filters.get('mine') == 'true' and self.request.user.is_authenticated:
             queryset = queryset.filter(created_by=self.request.user)
         return queryset
 

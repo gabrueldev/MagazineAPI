@@ -25,10 +25,10 @@ def test_fim_antes_do_inicio(auth_client, room):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inicio, fim", [
-    ("15:30", "16:30"),  # começa no meio do existente
-    ("14:30", "15:30"),  # termina no meio do existente
-    ("15:15", "15:45"),  # fica dentro do existente
-    ("14:00", "17:00"),  # engloba o existente
+    pytest.param("15:30", "16:30", id="comeca-no-meio-do-existente"),
+    pytest.param("14:30", "15:30", id="termina-no-meio-do-existente"),
+    pytest.param("15:15", "15:45", id="fica-dentro-do-existente"),
+    pytest.param("14:00", "17:00", id="engloba-o-existente"),
 ])
 def test_conflito_de_horario(auth_client, room, inicio, fim):
     auth_client.post("/api/schedules/create/", horario(room, "15:00", "16:00"))

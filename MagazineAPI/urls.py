@@ -1,7 +1,3 @@
-"""
-URL configuration for MagazineAPI project.
-
-"""
 from django.urls import path, include
 from .core.views import custom_404, custom_500
 
