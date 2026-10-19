@@ -2,7 +2,9 @@
 
 ![CI](https://github.com/gabrueldev/MagazineAPI/actions/workflows/ci.yml/badge.svg)
 
-API REST de **reserva de salas**, feita para o Desafio Backend da Magazine Luiza. Ela cuida de criar, editar e remover salas e de agendar horários nelas, **sem deixar dois agendamentos se chocarem**. Também tem login por token, filtros e um sistema de logs de tudo o que acontece.
+API REST de **reserva de salas**, feita para o Desafio Backend da Magazine Luiza. Ela cuida de criar, editar e remover salas e de agendar horários nelas, **sem deixar dois agendamentos se chocarem**. Também tem login por token, filtros, um sistema de logs de tudo o que acontece e uma **tela web** para usar tudo isso sem precisar de Postman.
+
+![Agenda do dia com as salas em colunas e as reservas como blocos](docs/agenda.png)
 
 ## Tecnologias
 
@@ -10,7 +12,8 @@ API REST de **reserva de salas**, feita para o Desafio Backend da Magazine Luiza
 + Django 5.2 + Django REST Framework
 + Autenticação por Token (DRF)
 + SQLite
-+ Pytest | 26 testes automatizados
++ Pytest | 29 testes automatizados
++ HTML, CSS e JavaScript puros na tela web (sem Node e sem build)
 + CI com GitHub Actions
 + Bruno (coleção de requisições pronta)
 
@@ -20,9 +23,23 @@ API REST de **reserva de salas**, feita para o Desafio Backend da Magazine Luiza
     python manage.py migrate
     python manage.py runserver
 
+Depois abra **http://localhost:8000** no navegador.
+
 E para rodar os testes:
 
     pytest
+
+## Tela web
+
+A pasta `Frontend` tem uma página única que o próprio Django serve em `/`. Ela só conversa com a API pelas rotas descritas abaixo.
+
++ **Entrar ou criar conta**: o token fica salvo no navegador e o botão Sair invalida o token na API
++ **Agenda**: as salas viram colunas e os horários, linhas (das 7h às 21h). Uma linha vermelha marca a hora atual. Para reservar, é só clicar num horário livre. As suas reservas aparecem em azul e as dos outros em cinza
++ **Conflito**: se o horário já estiver ocupado, a tela mostra o erro que a API devolveu, diz quem reservou antes e destaca na agenda a reserva que bateu
++ **Minhas reservas**: as próximas reservas aparecem primeiro e cada uma pode ser editada ou cancelada
++ **Salas**: cadastrar, editar e remover salas
+
+Os horários seguem o fuso de Brasília (`America/Sao_Paulo`), inclusive no filtro `?date=` da API.
 
 ## Autenticação
 
