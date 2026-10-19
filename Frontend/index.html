@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenda de Salas</title>
+<meta name="description" content="Reserve salas de reunião sem conflito de horário.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'><rect width='22' height='22' rx='6' fill='rgb(31,94,255)'/><rect x='5' y='5' width='5' height='12' fill='white'/><rect x='12' y='5' width='5' height='7' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/app/style.css">
+<script src="/app/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+<section class="auth" id="auth-screen" hidden>
+  <div class="auth-showcase" aria-hidden="true">
+    <p class="brand"><span class="brand-mark"></span>Agenda de Salas</p>
+    <div class="mini-agenda">
+      <div class="mini-column"><span class="mini-block mini-block--a"></span></div>
+      <div class="mini-column"><span class="mini-block mini-block--b"></span><span class="mini-block mini-block--intruder"></span></div>
+      <div class="mini-column"><span class="mini-block mini-block--c"></span></div>
+    </div>
+    <h1 class="auth-title">Cada sala no seu horário. <span>Nenhuma reserva em cima da outra.</span></h1>
+    <p class="auth-sub">Veja a ocupação do dia, clique num horário livre e pronto. Se alguém já reservou, a agenda mostra quem chegou antes.</p>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="tabs" role="tablist">
+        <button class="tab is-active" role="tab" aria-selected="true" data-auth-mode="login" type="button">Entrar</button>
+        <button class="tab" role="tab" aria-selected="false" data-auth-mode="cadaster" type="button">Criar conta</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label class="field">
+          <span>Usuário</span>
+          <input name="username" autocomplete="username" required>
+        </label>
+        <label class="field" id="email-field" hidden>
+          <span>E-mail</span>
+          <input name="email" type="email" autocomplete="email">
+        </label>
+        <label class="field">
+          <span>Senha</span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <p class="form-error" id="auth-error" role="alert"></p>
+        <button class="button button--primary button--wide" id="auth-submit" type="submit">Entrar</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div class="workspace" id="workspace" hidden>
+  <header class="topbar">
+    <p class="brand"><span class="brand-mark"></span>Agenda de Salas</p>
+    <nav class="views" aria-label="Seções">
+      <button class="view-button is-active" data-view="agenda" type="button">Agenda</button>
+      <button class="view-button" data-view="mine" type="button">Minhas reservas</button>
+      <button class="view-button" data-view="rooms" type="button">Salas</button>
+    </nav>
+    <div class="account">
+      <span class="avatar" id="avatar" aria-hidden="true"></span>
+      <span class="account-name" id="account-name"></span>
+      <button class="button button--ghost" id="logout" type="button">Sair</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="view" data-view-panel="agenda">
+      <div class="view-head">
+        <div>
+          <h2 id="agenda-title">Hoje</h2>
+          <p class="view-sub" id="agenda-summary"></p>
+        </div>
+        <div class="day-picker">
+          <button class="icon-button" id="previous-day" type="button" aria-label="Dia anterior">‹</button>
+          <button class="button button--ghost" id="today" type="button">Hoje</button>
+          <button class="icon-button" id="next-day" type="button" aria-label="Próximo dia">›</button>
+          <input class="date-input" id="day-input" type="date" aria-label="Escolher dia">
+        </div>
+      </div>
+      <div class="agenda-frame">
+        <div class="agenda" id="agenda"></div>
+      </div>
+      <div class="empty" id="agenda-empty" hidden>
+        <p>Nenhuma sala cadastrada ainda.</p>
+        <button class="button button--primary" data-view-shortcut="rooms" type="button">Cadastrar a primeira sala</button>
+      </div>
+    </section>
+
+    <section class="view" data-view-panel="mine" hidden>
+      <div class="view-head">
+        <div>
+          <h2>Minhas reservas</h2>
+          <p class="view-sub">Só você pode editar ou cancelar as reservas que fez.</p>
+        </div>
+      </div>
+      <ul class="booking-list" id="my-bookings"></ul>
+      <div class="empty" id="my-bookings-empty" hidden>
+        <p>Você ainda não reservou nenhuma sala.</p>
+        <button class="button button--primary" data-view-shortcut="agenda" type="button">Abrir a agenda</button>
+      </div>
+    </section>
+
+    <section class="view" data-view-panel="rooms" hidden>
+      <div class="view-head">
+        <div>
+          <h2>Salas</h2>
+          <p class="view-sub">O nome é único e a capacidade precisa ser maior que zero.</p>
+        </div>
+        <button class="button button--primary" id="new-room" type="button">Nova sala</button>
+      </div>
+      <div class="room-grid" id="room-grid"></div>
+      <div class="empty" id="rooms-empty" hidden>
+        <p>Nenhuma sala cadastrada ainda.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog class="dialog" id="booking-dialog" aria-labelledby="booking-dialog-title">
+  <form method="dialog" id="booking-form">
+    <h3 id="booking-dialog-title">Nova reserva</h3>
+    <label class="field">
+      <span>Sala</span>
+      <select name="room" required></select>
+    </label>
+    <label class="field">
+      <span>Dia</span>
+      <input name="day" type="date" required>
+    </label>
+    <div class="field-row">
+      <label class="field">
+        <span>Início</span>
+        <input name="start" type="time" step="900" required>
+      </label>
+      <label class="field">
+        <span>Término</span>
+        <input name="end" type="time" step="900" required>
+      </label>
+    </div>
+    <p class="form-error" id="booking-error" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="button button--danger-ghost" id="cancel-booking" type="button" hidden>Cancelar reserva</button>
+      <span class="spacer"></span>
+      <button class="button button--ghost" value="close" formnovalidate type="submit">Fechar</button>
+      <button class="button button--primary" id="booking-submit" value="save" type="submit">Reservar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dialog" id="room-dialog" aria-labelledby="room-dialog-title">
+  <form method="dialog" id="room-form">
+    <h3 id="room-dialog-title">Nova sala</h3>
+    <label class="field">
+      <span>Nome</span>
+      <input name="name" maxlength="20" required>
+    </label>
+    <div class="field-row">
+      <label class="field">
+        <span>Capacidade</span>
+        <input name="capacity" type="number" min="1" required>
+      </label>
+      <label class="field">
+        <span>Uso</span>
+        <input name="objective" maxlength="40" placeholder="Reuniões" required>
+      </label>
+    </div>
+    <p class="form-error" id="room-error" role="alert"></p>
+    <div class="dialog-actions">
+      <span class="spacer"></span>
+      <button class="button button--ghost" value="close" formnovalidate type="submit">Fechar</button>
+      <button class="button button--primary" value="save" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dialog dialog--small" id="confirm-dialog" aria-labelledby="confirm-title">
+  <form method="dialog">
+    <h3 id="confirm-title"></h3>
+    <p class="confirm-text" id="confirm-text"></p>
+    <div class="dialog-actions">
+      <span class="spacer"></span>
+      <button class="button button--ghost" value="no" type="submit">Voltar</button>
+      <button class="button button--danger" value="yes" type="submit" id="confirm-yes"></button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -15,7 +15,7 @@ class SchedulesSerializers(serializers.ModelSerializer):
         room  = data.get('room', getattr(self.instance, 'room', None))
 
         if end <= start:
-            raise serializers.ValidationError("End time must be after start time.")
+            raise serializers.ValidationError("O horário de término precisa ser depois do início.")
 
         starts_before_the_other_ends = dict(start_time__lt=end, end_time__gt=start)
         conflicts = Schedules.objects.filter(room=room, **starts_before_the_other_ends)
@@ -23,5 +23,5 @@ class SchedulesSerializers(serializers.ModelSerializer):
         if self.instance:
             conflicts = conflicts.exclude(pk=self.instance.pk)
         if conflicts.exists():
-            raise serializers.ValidationError("Time conflict: the room is already reserved in this range.")
+            raise serializers.ValidationError("Conflito de horário: a sala já está reservada nesse intervalo.")
         return data

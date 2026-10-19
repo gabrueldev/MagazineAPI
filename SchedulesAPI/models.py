@@ -17,7 +17,7 @@ class Schedules(models.Model):
 
     def clean(self):
         if self.end_time <= self.start_time:
-            raise ValidationError("End time must be after start time.")
+            raise ValidationError("O horário de término precisa ser depois do início.")
         conflicts = Schedules.objects.filter(
             room           = self.room,
             start_time__lt = self.end_time,
@@ -26,7 +26,7 @@ class Schedules(models.Model):
         if self.pk:
             conflicts = conflicts.exclude(pk=self.pk)
         if conflicts.exists():
-            raise ValidationError({"__all__": "There is already a schedule that conflicts with this time range."})
+            raise ValidationError({"__all__": "Conflito de horário: a sala já está reservada nesse intervalo."})
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
