@@ -1,18 +1,12 @@
 from django.db import models
-from datetime import datetime
 from django.utils import timezone
 
 class Log(models.Model):
     text = models.TextField(max_length=255)
     date = models.DateTimeField(default=timezone.now)
     def __str__(self):
-        return f"{self.text}: {self.datetime}"
+        return f"{self.text}: {self.date}"
 
-    def save(self, *args, **kwargs):
-        self.date = datetime.now()
-
-        super().save(*args, **kwargs)
-    
 def logger(message: str, **kwargs):
     from Logs.logs import LOGS_MESSAGES
     template_message = LOGS_MESSAGES.get(message)

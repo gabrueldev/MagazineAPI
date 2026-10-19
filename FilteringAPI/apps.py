@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
-def SchedulesAPIConfig(AppConfig):
+class FilteringAPIConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'SchedulesAPI'
+    name = 'FilteringAPI'
