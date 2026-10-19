@@ -23,15 +23,16 @@ class DbListAPI(APIView):
         return Response(serializer.data)
 
 class FilterAPI(APIView):
+    # rooms: busca a sala pelo nome | schedules: lista os agendamentos da sala com esse nome
     def get(self, request, dbname, objname):
-        model_info = MODEL_SERIALIZER_MAP.get(dbname)
-        if not model_info:
-            return Response({"detail": "Table not found."}, status=status.HTTP_404_NOT_FOUND)
-        model, serializer_class = model_info
-        try:
-            obj = model.objects.get(name=objname)
-        except model.DoesNotExist:
-            return Response({"detail": "Object not found."}, status=status.HTTP_404_NOT_FOUND)
+        if dbname == 'rooms':
+            room = Room.objects.filter(name=objname).first()
+            if not room:
+                return Response({"detail": "Object not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(RoomSerializer(room).data)
 
-        serializer = serializer_class(obj)
-        return Response(serializer.data)
+        if dbname == 'schedules':
+            schedules = Schedules.objects.filter(room__name=objname)
+            return Response(SchedulesSerializers(schedules, many=True).data)
+
+        return Response({"detail": "Table not found."}, status=status.HTTP_404_NOT_FOUND)
